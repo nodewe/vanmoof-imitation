@@ -1,9 +1,13 @@
 class BrakeBanner {
 	constructor(selector) {
 		this.app = new PIXI.Application({
+			//canvas 容器的宽度
 			width: window.innerWidth,
+			// canvas容器的高度
 			height: window.innerHeight,
+			// canvas 的背景
 			backgroundColor: 0xffffff,
+			// 变化
 			resizeTo: window
 		});
 		document.querySelector(selector)
@@ -11,14 +15,16 @@ class BrakeBanner {
 
 		this.stage = this.app.stage;
 		this.speed = 0;
+		//使用加载器
 		this.loader = new PIXI.Loader();
+		//加载资源
 		this.addResource()
 		// 加载
 		this.loader.load();
-		// 添加一个侦听器
+		// 添加一个侦听器 资源加载完成的回调函数
 		this.loader.onComplete.add(this.show.bind(this))
 	}
-	//添加资源
+	//添加所有的资源
 	addResource() {
 		const resources = [
 			'btn.png',
@@ -31,6 +37,7 @@ class BrakeBanner {
 			this.loader.add(reItem, `images/${reItem}`);
 		}
 	}
+	//显示上屏的逻辑
 	show() {
 		//按钮容器
 		this.actionButton = this.createActionButton();
@@ -38,13 +45,6 @@ class BrakeBanner {
 		this.bikeContainer = this.createBike();
 		//粒子特效
 		this.particle = this.createParticle()
-		// console.log(bikeContainer.width, 'bikeContainer')
-		
-		//给按钮容器 添加事件
-		
-		//添加手形
-		
-		// 侦听事件
 		// 得到车刹车的引用
 		const bikeLever = this.bikeContainer.children[0];
 		//鼠标按下 刹车按住
@@ -58,7 +58,7 @@ class BrakeBanner {
 				y:25,
 				duration:0.1
 			})
-			this.restart()
+			this.break()
 		});
 		//鼠标松开就回到原点
 		this.actionButton.on('mouseup', () => {
@@ -74,6 +74,7 @@ class BrakeBanner {
 			});
 			this.start()
 		});
+		//在场景中添加 粒子 车架 按钮
 		this.stage.addChild(this.particle);
 		this.stage.addChild(this.bikeContainer)
 		this.stage.addChild(this.actionButton);
@@ -81,19 +82,11 @@ class BrakeBanner {
 	// 创建粒子
 	createParticle() {
 		let particleContainer = new PIXI.Container();
-		let particles = [
-
-			],
+		let particles = [],
 			colors = [0xf1cf54, 0xb5cea8, 0xf1cf54];
 		particleContainer.rotation = Math.PI / 180 * 35;
 		particleContainer.x = this.bikeContainer.width/3;
 		//创建粒子
-		// 粒子有多个
-		//向某一个角度持续滚动
-		//跳出边界后回到顶部继续移动
-		//按住鼠标停止
-		//停止的时候回弹效果
-		//松开鼠标继续
 		for (let i = 0; i < 20; i++) {
 			const gr = new PIXI.Graphics();
 			gr.beginFill(colors[Math.floor(Math.random() * colors.length)]);
@@ -110,7 +103,7 @@ class BrakeBanner {
 			particleContainer.addChild(gr);
 			particles.push(pItem)
 		}
-		//
+		//循环执行的函数
 		const loop = ()=>this.loop(particles);
 		//开始
 		const start = ()=>{
@@ -127,11 +120,9 @@ class BrakeBanner {
 			this.pause(particles)
 		}
 		this.start = start
-		this.restart = pause
+		this.break = pause
 		// 执行一遍
 		start()
-
-		// this.loop()
 		return particleContainer
 	}
 	//动起来的函数
@@ -153,11 +144,6 @@ class BrakeBanner {
 			item.gr.scale.x = 1;
 			gsap.to(item.gr,{duration:.7,x:item.sx,y:item.sy,ease:'elastic.out'})
 		}
-	}
-
-	resize(bikeContainer) {
-		bikeContainer.x = window.innerWidth - bikeContainer.width;
-		bikeContainer.y = window.innerHeight - bikeContainer.height;
 	}
 	//创建一个精灵
 	createSprite(resource) {
@@ -201,7 +187,6 @@ class BrakeBanner {
 
 		let btnCircle2 = this.createSprite('btn_circle.png')
 
-
 		actionButton.addChild(btnImage)
 
 		actionButton.addChild(btnCircle)
@@ -210,30 +195,31 @@ class BrakeBanner {
 		// 设置按钮容器的宽高
 		actionButton.width = 80;
 		actionButton.height = 80;
-
+		//改变btnImage的x,y的轴心
 		btnImage.pivot.x = btnImage.pivot.y = btnImage.width / 2;
-
+		// 改变btnCircle的x,y的轴心
 		btnCircle.pivot.x = btnCircle.pivot.y = btnCircle.width / 2;
-
+		// 改变btnCircle2的x,y的轴心
 		btnCircle2.pivot.x = btnCircle2.pivot.y = btnCircle2.width / 2;
 		// 设置按钮容器的位置
 		actionButton.x = 200
 		actionButton.y = 240;
-
+		//设置圆环的缩放
 		btnCircle.scale.x = btnCircle.scale.y = 0.8
-
+		// 设置缓动动画 缩放
 		gsap.to(btnCircle.scale, {
 			duration: 1,
 			x: 1.3,
 			y: 1.3,
 			repeat: -1
 		})
-
+		//使用gsap设置缓动动画 透明度
 		gsap.to(btnCircle, {
 			duration: 1,
 			alpha: 0,
 			repeat: -1
 		})
+		//给按钮容器添加一个交互行为 后面可以侦听处理事件
 		actionButton.interactive = true;
 		actionButton.cursor = 'pointer';
 		return actionButton
